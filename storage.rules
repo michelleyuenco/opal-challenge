@@ -3,24 +3,52 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Opal media: public read, authenticated write (admins curate, users contribute their own opals)
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isImageOrVideo() {
+      return request.resource.contentType.matches('image/.*')
+        || request.resource.contentType.matches('video/.*');
+    }
+
+    // Opal media: public read; admins or any authed user (creating their own opal) may write.
+    // Cap image uploads at 15 MB and videos at 100 MB; ownership of the parent opal is enforced
+    // by the firestore /media create rule, which is the source of truth.
     match /opals/{opalId}/{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAuthed()
+        && isImageOrVideo()
+        && request.resource.size < 100 * 1024 * 1024;
+      allow delete: if isAdmin();
     }
 
     // Challenge reveal media: public read, admin-only write
     match /challenges/{challengeId}/{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null
-        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
-        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow write: if isAdmin()
+        && isImageOrVideo()
+        && request.resource.size < 100 * 1024 * 1024;
     }
 
-    // Poster version images: public read, authenticated write
+    // Poster version images: public read; any authed user may write (ownership/shared check
+    // is enforced by the firestore /posterVersions rules). Images only, max 15 MB.
     match /posters/{posterId}/{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAuthed()
+        && isImage()
+        && request.resource.size < 15 * 1024 * 1024;
+      allow delete: if isAuthed();
     }
 
     // Deny everything else

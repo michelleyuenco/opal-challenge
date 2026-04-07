@@ -31,10 +31,13 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAdmin()
         || (isAuthenticated()
-            && request.resource.data.createdBy == request.auth.uid);
+            && request.resource.data.createdBy == request.auth.uid
+            && request.resource.data.isDeleted == false);
       allow update: if isAdmin()
         || (isAuthenticated()
-            && resource.data.createdBy == request.auth.uid);
+            && resource.data.createdBy == request.auth.uid
+            && request.resource.data.createdBy == resource.data.createdBy
+            && request.resource.data.isDeleted == resource.data.isDeleted);
       allow delete: if isAdmin()
         || (isAuthenticated()
             && resource.data.createdBy == request.auth.uid);
@@ -44,7 +47,11 @@ service cloud.firestore {
     match /media/{mediaId} {
       allow read: if true;
       allow create: if isAuthenticated()
-        && request.resource.data.uploadedBy == request.auth.uid;
+        && request.resource.data.uploadedBy == request.auth.uid
+        && (
+          isAdmin()
+          || get(/databases/$(database)/documents/opals/$(request.resource.data.opalId)).data.createdBy == request.auth.uid
+        );
       allow update, delete: if isAdmin()
         || (isAuthenticated() && resource.data.uploadedBy == request.auth.uid);
     }
@@ -78,12 +85,17 @@ service cloud.firestore {
         && resource.data.userId == request.auth.uid;
     }
 
-    // Poster versions — owner of the parent poster can manage
+    // Poster versions — public read; create allowed for owner or for any authed user
+    // contributing to a *shared* poster; updates/deletes restricted to the parent poster owner.
     match /posterVersions/{versionId} {
       allow read: if true;
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && (
+          get(/databases/$(database)/documents/posters/$(request.resource.data.posterId)).data.userId == request.auth.uid
+          || get(/databases/$(database)/documents/posters/$(request.resource.data.posterId)).data.isShared == true
+        );
+      allow update, delete: if isAuthenticated()
+        && get(/databases/$(database)/documents/posters/$(resource.data.posterId)).data.userId == request.auth.uid;
     }
   }
 }
