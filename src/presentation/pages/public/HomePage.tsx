@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useChallenge } from '@presentation/hooks/useChallenge'
 import { useAuth } from '@presentation/hooks/useAuth'
 import { ChallengeStatusBadge } from '@presentation/components/challenge/ChallengeStatusBadge'
-import { ShaderAnimation } from '@presentation/components/ui/ShaderAnimation'
+import { InfiniteGrid } from '@presentation/components/ui/InfiniteGrid'
 
 export function HomePage() {
   const { data: challenge } = useChallenge()
@@ -11,9 +11,9 @@ export function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-black py-28">
-        <ShaderAnimation />
-        <div className="absolute inset-0 bg-black/30" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 py-28">
+        <InfiniteGrid />
+        <div className="absolute inset-0 bg-black/20" />
         <div className="relative mx-auto max-w-7xl px-6 text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
             Pick Your{' '}
