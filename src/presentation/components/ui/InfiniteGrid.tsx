@@ -2,11 +2,15 @@ import { useRef } from 'react'
 import {
   motion,
   useMotionValue,
-  useTransform,
   useMotionTemplate,
   useAnimationFrame,
-  type MotionValue,
 } from 'framer-motion'
+
+const GRID_STYLE: React.CSSProperties = {
+  backgroundImage:
+    'linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)',
+  backgroundSize: '40px 40px',
+}
 
 /** Animated grid background with a cursor-revealed accent layer. */
 export function InfiniteGrid() {
@@ -14,6 +18,7 @@ export function InfiniteGrid() {
 
   const mouseX = useMotionValue(-1000)
   const mouseY = useMotionValue(-1000)
+  const offset = useMotionValue(0)
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top } = e.currentTarget.getBoundingClientRect()
@@ -21,14 +26,11 @@ export function InfiniteGrid() {
     mouseY.set(e.clientY - top)
   }
 
-  const gridOffsetX = useMotionValue(0)
-  const gridOffsetY = useMotionValue(0)
-
-  useAnimationFrame(() => {
-    gridOffsetX.set((gridOffsetX.get() + 0.5) % 40)
-    gridOffsetY.set((gridOffsetY.get() + 0.5) % 40)
+  useAnimationFrame((t) => {
+    offset.set((t / 50) % 40)
   })
 
+  const bgPosition = useMotionTemplate`${offset}px ${offset}px`
   const maskImage = useMotionTemplate`radial-gradient(320px circle at ${mouseX}px ${mouseY}px, black, transparent)`
 
   return (
@@ -37,18 +39,22 @@ export function InfiniteGrid() {
       onMouseMove={handleMouseMove}
       className="absolute inset-0 overflow-hidden"
     >
-      {/* Faint base grid */}
-      <div className="absolute inset-0 text-white/30 opacity-20">
-        <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
-      </div>
+      {/* Faint scrolling base grid */}
+      <motion.div
+        className="absolute inset-0 text-white/40"
+        style={{ ...GRID_STYLE, backgroundPosition: bgPosition }}
+      />
 
       {/* Cursor-revealed accent grid */}
       <motion.div
-        className="absolute inset-0 text-amber-200 opacity-90"
-        style={{ maskImage, WebkitMaskImage: maskImage }}
-      >
-        <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
-      </motion.div>
+        className="absolute inset-0 text-amber-300"
+        style={{
+          ...GRID_STYLE,
+          backgroundPosition: bgPosition,
+          maskImage,
+          WebkitMaskImage: maskImage,
+        }}
+      />
 
       {/* Color blooms */}
       <div className="pointer-events-none absolute inset-0">
@@ -57,38 +63,5 @@ export function InfiniteGrid() {
         <div className="absolute bottom-[-20%] left-[-10%] h-[40%] w-[40%] rounded-full bg-indigo-500/40 blur-[120px]" />
       </div>
     </div>
-  )
-}
-
-function GridPattern({
-  offsetX,
-  offsetY,
-}: {
-  offsetX: MotionValue<number>
-  offsetY: MotionValue<number>
-}) {
-  const x = useTransform(offsetX, (v) => v)
-  const y = useTransform(offsetY, (v) => v)
-  return (
-    <svg className="h-full w-full">
-      <defs>
-        <motion.pattern
-          id="infinite-grid-pattern"
-          width="40"
-          height="40"
-          patternUnits="userSpaceOnUse"
-          x={x}
-          y={y}
-        >
-          <path
-            d="M 40 0 L 0 0 0 40"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-          />
-        </motion.pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#infinite-grid-pattern)" />
-    </svg>
   )
 }
