@@ -11,10 +11,10 @@ export function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 py-28">
+      <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 py-28">
         <InfiniteGrid />
         <div className="absolute inset-0 bg-black/20" />
-        <div className="relative mx-auto max-w-7xl px-6 text-center">
+        <div className="relative mx-auto w-full max-w-7xl px-6 text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
             Pick Your{' '}
             <span className="bg-gradient-to-r from-amber-200 to-yellow-100 bg-clip-text text-transparent">
