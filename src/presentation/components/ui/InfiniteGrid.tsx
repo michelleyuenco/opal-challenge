@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   motion,
   useMotionValue,
@@ -20,11 +20,18 @@ export function InfiniteGrid() {
   const mouseY = useMotionValue(-1000)
   const offset = useMotionValue(0)
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { left, top } = e.currentTarget.getBoundingClientRect()
-    mouseX.set(e.clientX - left)
-    mouseY.set(e.clientY - top)
-  }
+  // Listen on window so child elements above the grid don't swallow the event
+  useEffect(() => {
+    const handle = (e: MouseEvent) => {
+      const el = containerRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      mouseX.set(e.clientX - rect.left)
+      mouseY.set(e.clientY - rect.top)
+    }
+    window.addEventListener('mousemove', handle)
+    return () => window.removeEventListener('mousemove', handle)
+  }, [mouseX, mouseY])
 
   useAnimationFrame((t) => {
     offset.set((t / 50) % 40)
@@ -34,11 +41,7 @@ export function InfiniteGrid() {
   const maskImage = useMotionTemplate`radial-gradient(320px circle at ${mouseX}px ${mouseY}px, black, transparent)`
 
   return (
-    <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      className="absolute inset-0 overflow-hidden"
-    >
+    <div ref={containerRef} className="absolute inset-0 overflow-hidden">
       {/* Faint scrolling base grid */}
       <motion.div
         className="absolute inset-0 text-white/40"
