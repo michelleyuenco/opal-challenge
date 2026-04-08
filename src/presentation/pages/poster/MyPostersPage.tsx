@@ -80,6 +80,13 @@ export function MyPostersPage() {
     e.target.value = ''
     if (!file || !user) return
 
+    const sourceUrl = window.prompt(
+      'Source URL (optional) — where did this photo come from?',
+    ) ?? ''
+    const tool = window.prompt(
+      'Tool used (optional) — e.g. iPhone, Gemini, Nano Banana',
+    ) ?? ''
+
     setCreating(true)
     try {
       const defaultTitle = file.name.replace(/\.[^.]+$/, '') || 'Untitled Journey'
@@ -94,6 +101,8 @@ export function MyPostersPage() {
         file,
         label: 'Original',
         notes: 'Street poster captured in the wild',
+        sourceUrl,
+        tool,
         userId: user.id,
       })
       await sharePoster.mutateAsync({ posterId: poster.id, isShared: true })

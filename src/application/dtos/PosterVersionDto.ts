@@ -5,6 +5,8 @@ export interface PosterVersionDto {
   readonly downloadUrl: string
   readonly label: string
   readonly notes: string
+  readonly sourceUrl: string | null
+  readonly tool: string | null
   readonly versionNumber: number
   readonly createdAt: number
 }

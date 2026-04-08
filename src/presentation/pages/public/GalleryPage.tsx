@@ -22,6 +22,13 @@ export function GalleryPage() {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file || !user) return
+    const sourceUrl = window.prompt(
+      'Source URL (optional) — where is this opal from?',
+    ) ?? ''
+    const tool = window.prompt(
+      'Tool or camera (optional) — e.g. iPhone 15 macro, Canon R5',
+    ) ?? ''
+
     setUploading(true)
     setErrorMsg(null)
     try {
@@ -35,6 +42,8 @@ export function GalleryPage() {
         opalId: opal.id,
         file,
         uploadedBy: user.id,
+        sourceUrl,
+        tool,
       })
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Upload failed')

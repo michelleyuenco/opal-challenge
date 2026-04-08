@@ -12,4 +12,6 @@ export interface Media {
   readonly displayOrder: number
   readonly uploadedAt: Timestamp
   readonly uploadedBy: string
+  readonly sourceUrl: string | null
+  readonly tool: string | null
 }

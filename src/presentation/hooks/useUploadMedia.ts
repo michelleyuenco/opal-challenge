@@ -13,6 +13,8 @@ export function useUploadMedia() {
       opalId: string
       file: File
       uploadedBy: string
+      sourceUrl?: string | null
+      tool?: string | null
     }) => {
       const compressed = await compressFile(input.file)
       const useCase = container.resolve<UploadMediaUseCase>(

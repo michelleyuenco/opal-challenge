@@ -138,6 +138,8 @@ export function useUploadVersion() {
       file: File
       label: string
       notes: string
+      sourceUrl?: string | null
+      tool?: string | null
       userId: string
     }) => {
       const compressed = await compressFile(input.file)

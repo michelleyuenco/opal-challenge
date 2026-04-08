@@ -11,6 +11,8 @@ export const PosterVersionMapper = {
       thumbnailPath: doc.thumbnailPath ?? null,
       label: doc.label,
       notes: doc.notes,
+      sourceUrl: doc.sourceUrl ?? null,
+      tool: doc.tool ?? null,
       versionNumber: doc.versionNumber,
       createdAt: doc.createdAt,
     }
@@ -24,6 +26,8 @@ export const PosterVersionMapper = {
       thumbnailPath: entity.thumbnailPath,
       label: entity.label,
       notes: entity.notes,
+      sourceUrl: entity.sourceUrl,
+      tool: entity.tool,
       versionNumber: entity.versionNumber,
       createdAt: entity.createdAt,
     }

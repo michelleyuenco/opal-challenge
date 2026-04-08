@@ -50,6 +50,8 @@ export class GetOpalWithMediaUseCase {
         sizeBytes: m.sizeBytes,
         durationSeconds: m.durationSeconds,
         displayOrder: m.displayOrder,
+        sourceUrl: m.sourceUrl,
+        tool: m.tool,
       })
     }
 

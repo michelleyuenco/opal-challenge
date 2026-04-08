@@ -49,12 +49,20 @@ function TimelineStep({
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file || !user) return
+    const sourceUrl = window.prompt(
+      'Source URL (optional) — link to the original or inspiration',
+    ) ?? ''
+    const tool = window.prompt(
+      'Tool used (optional) — e.g. Gemini, Nano Banana, Photoshop',
+    ) ?? ''
     await uploadVersion.mutateAsync({
       posterId,
       parentVersionId: node.id,
       file,
       label: 'Community remix',
       notes: '',
+      sourceUrl,
+      tool,
       userId: user.id,
     })
   }
@@ -115,6 +123,25 @@ function TimelineStep({
           </h3>
           {node.notes && (
             <p className="mt-2 text-sm leading-relaxed text-gray-600">{node.notes}</p>
+          )}
+          {(node.tool || node.sourceUrl) && (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {node.tool && (
+                <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-medium text-indigo-700 ring-1 ring-indigo-100">
+                  {node.tool}
+                </span>
+              )}
+              {node.sourceUrl && (
+                <a
+                  href={node.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2.5 py-0.5 text-[11px] font-medium text-gray-600 ring-1 ring-gray-100 hover:bg-gray-100 hover:text-indigo-700"
+                >
+                  source ↗
+                </a>
+              )}
+            </div>
           )}
           <p className="mt-2 text-xs text-gray-400">{formatDate(node.createdAt)}</p>
 

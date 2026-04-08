@@ -27,6 +27,8 @@ export class UploadPosterVersionUseCase {
     file: File
     label: string
     notes: string
+    sourceUrl?: string | null
+    tool?: string | null
     userId: string
   }): Promise<Result<PosterVersion, AppError>> {
     const posterResult = await this.#posterRepo.findById(input.posterId)
@@ -85,6 +87,8 @@ export class UploadPosterVersionUseCase {
       thumbnailPath: null,
       label: input.label,
       notes: input.notes,
+      sourceUrl: input.sourceUrl?.trim() || null,
+      tool: input.tool?.trim() || null,
       versionNumber,
       createdAt: Date.now(),
     }

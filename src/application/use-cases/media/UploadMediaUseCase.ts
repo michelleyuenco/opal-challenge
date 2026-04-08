@@ -26,6 +26,8 @@ export class UploadMediaUseCase {
     opalId: string
     file: File
     uploadedBy: string
+    sourceUrl?: string | null
+    tool?: string | null
   }): Promise<Result<Media, AppError>> {
     const opalResult = await this.#opalRepo.findById(input.opalId)
     if (!opalResult.ok) return opalResult
@@ -57,6 +59,8 @@ export class UploadMediaUseCase {
       displayOrder: opal.mediaIds.length,
       uploadedAt: Date.now(),
       uploadedBy: input.uploadedBy,
+      sourceUrl: input.sourceUrl?.trim() || null,
+      tool: input.tool?.trim() || null,
     }
 
     const saveResult = await this.#mediaRepo.save(media)

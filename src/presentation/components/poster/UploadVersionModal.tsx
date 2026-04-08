@@ -28,6 +28,8 @@ export function UploadVersionModal({
   const [preview, setPreview] = useState<string | null>(null)
   const [label, setLabel] = useState('')
   const [notes, setNotes] = useState('')
+  const [sourceUrl, setSourceUrl] = useState('')
+  const [tool, setTool] = useState('')
 
   const onDrop = useCallback((accepted: File[]) => {
     const f = accepted[0]
@@ -47,6 +49,8 @@ export function UploadVersionModal({
     setPreview(null)
     setLabel('')
     setNotes('')
+    setSourceUrl('')
+    setTool('')
   }
 
   const handleClose = () => {
@@ -63,6 +67,8 @@ export function UploadVersionModal({
       file,
       label: label.trim() || 'Untitled',
       notes: notes.trim(),
+      sourceUrl: sourceUrl.trim() || null,
+      tool: tool.trim() || null,
       userId: user.id,
     })
 
@@ -144,6 +150,22 @@ export function UploadVersionModal({
           value={label}
           onChange={(e) => setLabel(e.target.value)}
         />
+
+        {/* Tool + source */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Input
+            label="Tool used"
+            placeholder="Gemini, Nano Banana, Photoshop…"
+            value={tool}
+            onChange={(e) => setTool(e.target.value)}
+          />
+          <Input
+            label="Source URL"
+            placeholder="https://…"
+            value={sourceUrl}
+            onChange={(e) => setSourceUrl(e.target.value)}
+          />
+        </div>
 
         {/* Notes */}
         <div className="space-y-1">

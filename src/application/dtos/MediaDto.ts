@@ -9,4 +9,6 @@ export interface MediaDto {
   readonly sizeBytes: number
   readonly durationSeconds: number | null
   readonly displayOrder: number
+  readonly sourceUrl: string | null
+  readonly tool: string | null
 }

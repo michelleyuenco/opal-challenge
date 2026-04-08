@@ -14,6 +14,8 @@ export const MediaMapper = {
       displayOrder: doc.displayOrder,
       uploadedAt: doc.uploadedAt,
       uploadedBy: doc.uploadedBy,
+      sourceUrl: doc.sourceUrl ?? null,
+      tool: doc.tool ?? null,
     }
   },
 
@@ -28,6 +30,8 @@ export const MediaMapper = {
       displayOrder: entity.displayOrder,
       uploadedAt: entity.uploadedAt,
       uploadedBy: entity.uploadedBy,
+      sourceUrl: entity.sourceUrl,
+      tool: entity.tool,
     }
   },
 }

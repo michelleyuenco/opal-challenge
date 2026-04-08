@@ -8,6 +8,8 @@ export interface PosterVersion {
   readonly thumbnailPath: string | null
   readonly label: string
   readonly notes: string
+  readonly sourceUrl: string | null
+  readonly tool: string | null
   readonly versionNumber: number
   readonly createdAt: Timestamp
 }
