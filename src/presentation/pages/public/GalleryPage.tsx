@@ -6,6 +6,7 @@ import { useAuth } from '@presentation/hooks/useAuth'
 import { OpalGrid } from '@presentation/components/opal/OpalGrid'
 import { Spinner } from '@presentation/components/ui/Spinner'
 import { Button } from '@presentation/components/ui/Button'
+import { ContributeDialog, type ContributeFormValues } from '@presentation/components/poster/ContributeDialog'
 
 export function GalleryPage() {
   const { data: opals, isLoading, error } = useOpals()
@@ -15,24 +16,24 @@ export function GalleryPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
 
   const openPicker = () => fileInputRef.current?.click()
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file || !user) return
-    const sourceUrl = window.prompt(
-      'Source URL (optional) — where is this opal from?',
-    ) ?? ''
-    const tool = window.prompt(
-      'Tool or camera (optional) — e.g. iPhone 15 macro, Canon R5',
-    ) ?? ''
+    setErrorMsg(null)
+    setPendingFile(file)
+  }
 
+  const handleSubmit = async ({ tool, sourceUrl }: ContributeFormValues) => {
+    if (!pendingFile || !user) return
     setUploading(true)
     setErrorMsg(null)
     try {
-      const title = file.name.replace(/\.[^.]+$/, '') || 'My Opal'
+      const title = pendingFile.name.replace(/\.[^.]+$/, '') || 'My Opal'
       const opal = await createOpal.mutateAsync({
         title,
         description: `Submitted by ${user.email ?? 'a community member'}`,
@@ -40,11 +41,12 @@ export function GalleryPage() {
       })
       await uploadMedia.mutateAsync({
         opalId: opal.id,
-        file,
+        file: pendingFile,
         uploadedBy: user.id,
         sourceUrl,
         tool,
       })
+      setPendingFile(null)
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Upload failed')
     } finally {
@@ -108,6 +110,17 @@ export function GalleryPage() {
 
         {opals && <OpalGrid opals={opals} />}
       </div>
+
+      <ContributeDialog
+        open={pendingFile !== null}
+        file={pendingFile}
+        title="Submit your opal"
+        submitLabel="Upload opal"
+        loading={uploading}
+        error={errorMsg}
+        onCancel={() => !uploading && setPendingFile(null)}
+        onSubmit={handleSubmit}
+      />
     </div>
   )
 }

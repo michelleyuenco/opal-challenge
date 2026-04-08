@@ -4,6 +4,7 @@ import { usePoster, useVersionTree, useUploadVersion } from '@presentation/hooks
 import { useAuth } from '@presentation/hooks/useAuth'
 import { Spinner } from '@presentation/components/ui/Spinner'
 import { Button } from '@presentation/components/ui/Button'
+import { ContributeDialog } from '@presentation/components/poster/ContributeDialog'
 import type { PosterVersionNode } from '@domain/entities/PosterVersion'
 
 function formatDate(ts: number): string {
@@ -44,27 +45,40 @@ function TimelineStep({
   const { user } = useAuth()
   const uploadVersion = useUploadVersion()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file || !user) return
-    const sourceUrl = window.prompt(
-      'Source URL (optional) — link to the original or inspiration',
-    ) ?? ''
-    const tool = window.prompt(
-      'Tool used (optional) — e.g. Gemini, Nano Banana, Photoshop',
-    ) ?? ''
-    await uploadVersion.mutateAsync({
-      posterId,
-      parentVersionId: node.id,
-      file,
-      label: 'Community remix',
-      notes: '',
-      sourceUrl,
-      tool,
-      userId: user.id,
-    })
+    setUploadError(null)
+    setPendingFile(file)
+  }
+
+  const submitContribution = async ({
+    tool,
+    sourceUrl,
+  }: {
+    tool: string
+    sourceUrl: string
+  }) => {
+    if (!pendingFile || !user) return
+    try {
+      await uploadVersion.mutateAsync({
+        posterId,
+        parentVersionId: node.id,
+        file: pendingFile,
+        label: 'Community remix',
+        notes: '',
+        sourceUrl: sourceUrl || null,
+        tool: tool || null,
+        userId: user.id,
+      })
+      setPendingFile(null)
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed')
+    }
   }
 
   return (
@@ -179,6 +193,20 @@ function TimelineStep({
           </div>
         </div>
       </div>
+
+      <ContributeDialog
+        open={pendingFile !== null}
+        file={pendingFile}
+        title="Continue this journey"
+        submitLabel="Add to journey"
+        loading={uploadVersion.isPending}
+        error={uploadError}
+        onCancel={() => {
+          setPendingFile(null)
+          setUploadError(null)
+        }}
+        onSubmit={submitContribution}
+      />
     </div>
   )
 }
