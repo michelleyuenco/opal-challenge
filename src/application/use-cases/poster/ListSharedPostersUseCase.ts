@@ -31,16 +31,16 @@ export class ListSharedPostersUseCase {
       const versionsResult = await this.#versionRepo.findByPosterId(poster.id)
       const versions = versionsResult.ok ? versionsResult.value : []
 
+      const sorted = [...versions].sort((a, b) => b.createdAt - a.createdAt)
+      const representative =
+        versions.find((v) => v.id === poster.rootVersionId) ?? sorted[0]
+
       let thumbnailUrl: string | null = null
-      if (poster.rootVersionId) {
-        const rootVersion = versions.find((v) => v.id === poster.rootVersionId)
-        if (rootVersion?.thumbnailPath) {
-          const urlResult = await this.#storageService.getDownloadUrl(
-            rootVersion.thumbnailPath,
-          )
-          if (urlResult.ok) {
-            thumbnailUrl = urlResult.value
-          }
+      if (representative) {
+        const path = representative.thumbnailPath ?? representative.storagePath
+        const urlResult = await this.#storageService.getDownloadUrl(path)
+        if (urlResult.ok) {
+          thumbnailUrl = urlResult.value
         }
       }
 

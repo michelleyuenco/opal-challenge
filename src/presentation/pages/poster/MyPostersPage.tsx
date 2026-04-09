@@ -184,6 +184,8 @@ export function MyPostersPage() {
       if (shareJourney) {
         await sharePoster.mutateAsync({ posterId: poster.id, isShared: true })
       }
+      // Close the dialog before navigating away so React Router unmounts cleanly
+      setPendingFile(null)
       navigate(`/poster/editor/${poster.id}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
