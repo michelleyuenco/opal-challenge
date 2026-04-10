@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   usePoster,
@@ -38,6 +38,27 @@ export function PosterEditorPage() {
 
   // Delete confirmation
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  // Flatten tree so we can auto-select the most recent version
+  const treeNodesForHooks = tree ?? []
+  const allNodes = useMemo(() => {
+    const out: PosterVersionNode[] = []
+    const walk = (nodes: PosterVersionNode[]) => {
+      for (const n of nodes) {
+        out.push(n)
+        walk(n.children)
+      }
+    }
+    walk(treeNodesForHooks)
+    return out
+  }, [treeNodesForHooks])
+
+  // Auto-select the newest version on first load so the just-uploaded image is visible
+  useEffect(() => {
+    if (selectedNode || allNodes.length === 0) return
+    const newest = [...allNodes].sort((a, b) => b.createdAt - a.createdAt)[0]
+    setSelectedNode(newest)
+  }, [allNodes, selectedNode])
 
   if (posterLoading || treeLoading) {
     return (
