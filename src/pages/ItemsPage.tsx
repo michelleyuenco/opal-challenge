@@ -5,6 +5,7 @@ import { useBooths } from '../hooks/useBooths'
 import { ItemCard } from '../components/items/ItemCard'
 import { QuickAddSheet } from '../components/items/QuickAddSheet'
 import { Button } from '../components/ui/Button'
+import { BudgetCard } from '../components/budget/BudgetCard'
 
 export function ItemsPage() {
   const { trip } = useTripContext()
@@ -21,7 +22,7 @@ export function ItemsPage() {
     <div className="mx-auto max-w-md px-4 py-4">
       <div className="mb-4">
         <h1 className="text-xl font-semibold">{trip.name}</h1>
-        <p className="text-xs text-neutral-500">Budget card lands in Task 11</p>
+        <BudgetCard trip={trip} items={items} />
       </div>
 
       {loading && <div className="text-sm text-neutral-500">Loading…</div>}

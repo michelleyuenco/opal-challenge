@@ -6,6 +6,8 @@ import { useAuth } from '../hooks/useAuth'
 import { tripDoc } from '../lib/firestorePaths'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { BudgetAdjustSheet } from '../components/budget/BudgetAdjustSheet'
+import { RateEditor } from '../components/budget/RateEditor'
 
 export function SettingsPage() {
   const { trip } = useTripContext()
@@ -15,6 +17,7 @@ export function SettingsPage() {
 
   const [name, setName] = useState(trip.name)
   const [savingName, setSavingName] = useState(false)
+  const [budgetOpen, setBudgetOpen] = useState(false)
 
   async function saveName() {
     if (!name.trim() || name === trip.name) return
@@ -65,10 +68,18 @@ export function SettingsPage() {
         <p className="text-xs text-neutral-500">Invite UI added in Task 14.</p>
       </section>
 
-      <section className="space-y-2 rounded-xl border border-neutral-200 bg-white p-4">
-        <div className="text-sm font-medium">Budget &amp; rates</div>
-        <p className="text-xs text-neutral-500">Added in Task 11.</p>
+      <section className="space-y-3 rounded-xl border border-neutral-200 bg-white p-4">
+        <div className="text-sm font-medium">Budget</div>
+        <div className="text-xs text-neutral-500">Current: ¥{trip.budgetJpy.toLocaleString()}</div>
+        <Button variant="secondary" onClick={() => setBudgetOpen(true)}>Adjust budget</Button>
       </section>
+
+      <section className="space-y-3 rounded-xl border border-neutral-200 bg-white p-4">
+        <div className="text-sm font-medium">Conversion rates</div>
+        <RateEditor trip={trip} />
+      </section>
+
+      <BudgetAdjustSheet trip={trip} open={budgetOpen} onClose={() => setBudgetOpen(false)} />
 
       <div className="pt-2">
         {isOwner ? (
