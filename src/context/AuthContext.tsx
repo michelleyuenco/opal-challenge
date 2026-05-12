@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { onAuthStateChanged, type User } from 'firebase/auth'
-import { setDoc, serverTimestamp } from 'firebase/firestore'
+import { getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth } from '../firebase'
 import { userDoc } from '../lib/firestorePaths'
 
@@ -21,16 +21,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(u)
       setLoading(false)
       if (u) {
-        await setDoc(
-          userDoc(u.uid),
-          {
-            email: u.email ?? '',
-            displayName: u.displayName ?? '',
-            photoURL: u.photoURL ?? '',
-            createdAt: serverTimestamp(),
-          },
-          { merge: true },
-        )
+        const ref = userDoc(u.uid)
+        const existing = await getDoc(ref)
+        const profile = {
+          email: u.email ?? '',
+          displayName: u.displayName ?? '',
+          photoURL: u.photoURL ?? '',
+          lastSeenAt: serverTimestamp(),
+          ...(existing.exists() ? {} : { createdAt: serverTimestamp() }),
+        }
+        await setDoc(ref, profile, { merge: true })
       }
     })
   }, [])

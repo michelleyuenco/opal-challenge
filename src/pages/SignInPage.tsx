@@ -1,14 +1,12 @@
-import { useNavigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { Button } from '../components/ui/Button'
 
 export function SignInPage() {
   const { user, signIn } = useAuth()
-  const navigate = useNavigate()
 
   if (user) {
-    navigate('/', { replace: true })
-    return null
+    return <Navigate to="/" replace />
   }
 
   return (
