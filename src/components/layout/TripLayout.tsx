@@ -2,6 +2,7 @@ import { Outlet, useParams, Navigate } from 'react-router-dom'
 import { useTrip } from '../../hooks/useTrip'
 import { TripProvider } from '../../context/TripContext'
 import { BottomNav } from './BottomNav'
+import { OfflineBanner } from './OfflineBanner'
 
 export function TripLayout() {
   const { tripId } = useParams<{ tripId: string }>()
@@ -21,6 +22,7 @@ export function TripLayout() {
   return (
     <TripProvider trip={trip}>
       <div className="flex min-h-screen flex-col bg-neutral-50">
+        <OfflineBanner />
         <main className="flex-1 pb-2">
           <Outlet />
         </main>
