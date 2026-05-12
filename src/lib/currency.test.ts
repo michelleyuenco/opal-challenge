@@ -102,4 +102,10 @@ describe('formatters', () => {
     expect(formatHkd(2060)).toBe('HK$2,060')
     expect(formatHkd(15.5)).toBe('HK$15.50')
   })
+  test('formatUsd/formatHkd switch to 0 decimals after rounding crosses 100', () => {
+    expect(formatUsd(99.999)).toBe('US$100')
+    expect(formatUsd(99.994)).toBe('US$99.99')
+    expect(formatHkd(99.996)).toBe('HK$100')
+    expect(formatHkd(-99.999)).toBe('-HK$100')
+  })
 })

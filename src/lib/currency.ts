@@ -53,13 +53,14 @@ export function formatJpy(jpy: number): string {
 }
 
 function formatCurrencyWithThreshold(value: number, prefix: string): string {
-  const abs = Math.abs(value)
   const sign = value < 0 ? '-' : ''
-  const decimals = abs >= 100 ? 0 : 2
-  const rounded = decimals === 0 ? Math.round(abs) : abs.toFixed(2)
-  const num = typeof rounded === 'number'
-    ? rounded.toLocaleString('en-US')
-    : Number(rounded).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const abs = Math.abs(value)
+  const rounded2 = Math.round(abs * 100) / 100
+  const decimals = rounded2 >= 100 ? 0 : 2
+  const num = rounded2.toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  })
   return `${sign}${prefix}${num}`
 }
 
