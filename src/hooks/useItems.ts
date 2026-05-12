@@ -10,12 +10,19 @@ export function useItems(tripId: string) {
   useEffect(() => {
     const q = query(itemsCol(tripId), orderBy('updatedAt', 'desc'))
     setLoading(true)
-    return onSnapshot(q, (snap) => {
-      setItems(
-        snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Item, 'id'>) })),
-      )
-      setLoading(false)
-    })
+    return onSnapshot(
+      q,
+      (snap) => {
+        setItems(
+          snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Item, 'id'>) })),
+        )
+        setLoading(false)
+      },
+      () => {
+        setItems([])
+        setLoading(false)
+      },
+    )
   }, [tripId])
 
   return { items, loading }

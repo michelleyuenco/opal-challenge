@@ -14,14 +14,21 @@ export function useTrip(tripId: string | null) {
       return
     }
     setLoading(true)
-    return onSnapshot(tripDoc(tripId), (snap) => {
-      if (!snap.exists()) {
+    return onSnapshot(
+      tripDoc(tripId),
+      (snap) => {
+        if (!snap.exists()) {
+          setTrip(null)
+        } else {
+          setTrip({ id: snap.id, ...(snap.data() as Omit<Trip, 'id'>) })
+        }
+        setLoading(false)
+      },
+      () => {
         setTrip(null)
-      } else {
-        setTrip({ id: snap.id, ...(snap.data() as Omit<Trip, 'id'>) })
-      }
-      setLoading(false)
-    })
+        setLoading(false)
+      },
+    )
   }, [tripId])
 
   return { trip, loading }

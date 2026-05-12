@@ -10,12 +10,19 @@ export function useBooths(tripId: string) {
   useEffect(() => {
     const q = query(boothsCol(tripId), orderBy('number'))
     setLoading(true)
-    return onSnapshot(q, (snap) => {
-      setBooths(
-        snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Booth, 'id'>) })),
-      )
-      setLoading(false)
-    })
+    return onSnapshot(
+      q,
+      (snap) => {
+        setBooths(
+          snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Booth, 'id'>) })),
+        )
+        setLoading(false)
+      },
+      () => {
+        setBooths([])
+        setLoading(false)
+      },
+    )
   }, [tripId])
 
   return { booths, loading }

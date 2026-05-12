@@ -44,16 +44,32 @@ export function useTrips() {
     const stopL = () => {
       if (gotOwned && gotCollab) setLoading(false)
     }
-    const unsubA = onSnapshot(qOwned, (s) => {
-      setOwned(snapToTrips(s))
-      gotOwned = true
-      stopL()
-    })
-    const unsubB = onSnapshot(qCollab, (s) => {
-      setCollab(snapToTrips(s))
-      gotCollab = true
-      stopL()
-    })
+    const unsubA = onSnapshot(
+      qOwned,
+      (s) => {
+        setOwned(snapToTrips(s))
+        gotOwned = true
+        stopL()
+      },
+      () => {
+        setOwned([])
+        gotOwned = true
+        stopL()
+      },
+    )
+    const unsubB = onSnapshot(
+      qCollab,
+      (s) => {
+        setCollab(snapToTrips(s))
+        gotCollab = true
+        stopL()
+      },
+      () => {
+        setCollab([])
+        gotCollab = true
+        stopL()
+      },
+    )
     return () => {
       unsubA()
       unsubB()
