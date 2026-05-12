@@ -22,6 +22,8 @@ import { BoothPicker } from '../components/booths/BoothPicker'
 import { StatusPill } from '../components/items/StatusPill'
 import { StarRating } from '../components/items/StarRating'
 import { OpalTagInput } from '../components/items/OpalTagInput'
+import { PhotoUploader } from '../components/items/PhotoUploader'
+import { PhotoGallery } from '../components/items/PhotoGallery'
 
 export function ItemDetailPage() {
   const { trip } = useTripContext()
@@ -81,9 +83,17 @@ export function ItemDetailPage() {
         <StatusPill item={item} />
       </div>
 
-      <div className="text-xs text-neutral-500">
-        Photos UI in Task 10 · {item.photos.length} attached
-      </div>
+      <section className="space-y-3 rounded-xl border border-neutral-200 bg-white p-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-neutral-700">Photos</span>
+          <PhotoUploader
+            tripId={trip.id}
+            itemId={item.id}
+            remainingSlots={Math.max(0, 5 - item.photos.length)}
+          />
+        </div>
+        <PhotoGallery tripId={trip.id} itemId={item.id} photos={item.photos} />
+      </section>
 
       <section className="space-y-3 rounded-xl border border-neutral-200 bg-white p-4">
         <div>

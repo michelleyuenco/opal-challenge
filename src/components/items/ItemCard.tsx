@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clsx } from 'clsx'
-import type { Item, Booth, Trip } from '../../lib/types'
+import { ref as storageRef, getDownloadURL } from 'firebase/storage'
+import { storage } from '../../firebase'
+import type { Item, Booth, Trip, Photo } from '../../lib/types'
 import {
   formatJpy,
   formatUsd,
@@ -34,23 +37,12 @@ export function ItemCard({ item, trip, booth }: Props) {
   const headlineJpy = effectiveItemJpy(item)
   const headlineUsd = item.overrideUsd ?? jpyToUsd(headlineJpy, trip.rates.jpyToUsd)
   const headlineHkd = item.overrideHkd ?? jpyToHkd(headlineJpy, trip.rates.jpyToHkd)
-  const cover = item.photos[0]
-
   return (
     <button
       onClick={() => navigate(`/trips/${trip.id}/items/${item.id}`)}
       className="flex w-full gap-3 rounded-xl border border-neutral-200 bg-white p-3 text-left hover:bg-neutral-50"
     >
-      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-neutral-100">
-        {cover && (
-          <img
-            src={`https://firebasestorage.googleapis.com/v0/b/${import.meta.env.VITE_FIREBASE_STORAGE_BUCKET}/o/${encodeURIComponent(cover.storagePath)}?alt=media`}
-            alt=""
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
-        )}
-      </div>
+      <ItemThumb photo={item.photos[0]} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between">
           <div className="truncate text-sm font-semibold">
@@ -92,5 +84,26 @@ export function ItemCard({ item, trip, booth }: Props) {
         </div>
       </div>
     </button>
+  )
+}
+
+function ItemThumb({ photo }: { photo: Photo | undefined }) {
+  const [url, setUrl] = useState<string | null>(null)
+  useEffect(() => {
+    if (!photo) return
+    let cancelled = false
+    getDownloadURL(storageRef(storage, photo.storagePath))
+      .then((u) => {
+        if (!cancelled) setUrl(u)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [photo?.storagePath])
+  return (
+    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+      {url && <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" />}
+    </div>
   )
 }
