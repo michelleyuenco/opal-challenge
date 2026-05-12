@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const ref = userDoc(u.uid)
         const existing = await getDoc(ref)
         const profile = {
-          email: u.email ?? '',
+          email: (u.email ?? '').toLowerCase(),
           displayName: u.displayName ?? '',
           photoURL: u.photoURL ?? '',
           lastSeenAt: serverTimestamp(),
