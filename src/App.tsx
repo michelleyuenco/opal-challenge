@@ -7,6 +7,7 @@ import { TripLayout } from './components/layout/TripLayout'
 import { SettingsPage } from './pages/SettingsPage'
 import { BoothsPage } from './pages/BoothsPage'
 import { ItemsPage } from './pages/ItemsPage'
+import { ItemDetailPage } from './pages/ItemDetailPage'
 
 export function App() {
   return (
@@ -32,6 +33,7 @@ export function App() {
           <Route index element={<ItemsPage />} />
           <Route path="booths" element={<BoothsPage />} />
           <Route path="booths/:boothId" element={<div className="p-4">Booth detail (Task 13)</div>} />
+          <Route path="items/:itemId" element={<ItemDetailPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
