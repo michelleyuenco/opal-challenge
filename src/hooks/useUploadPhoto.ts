@@ -4,7 +4,7 @@ import {
   serverTimestamp,
   arrayUnion,
   updateDoc,
-  type FieldValue,
+  Timestamp,
 } from 'firebase/firestore'
 import { storage } from '../firebase'
 import { itemDoc, itemPhotoStoragePath } from '../lib/firestorePaths'
@@ -43,6 +43,7 @@ export function useUploadPhoto() {
           maxSizeMB: 1,
           maxWidthOrHeight: 1200,
           useWebWorker: true,
+          fileType: 'image/jpeg',
         })
         const photoId = crypto.randomUUID()
         const path = itemPhotoStoragePath(tripId, itemId, photoId)
@@ -57,7 +58,7 @@ export function useUploadPhoto() {
           thumbPath: null,
           width,
           height,
-          uploadedAt: serverTimestamp() as unknown as FieldValue,
+          uploadedAt: Timestamp.now(),
           uploadedByUid: user.uid,
         }
         await updateDoc(itemDoc(tripId, itemId), {
