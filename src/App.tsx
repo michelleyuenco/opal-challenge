@@ -5,6 +5,7 @@ import { SignInPage } from './pages/SignInPage'
 import { TripPickerPage } from './pages/TripPickerPage'
 import { TripLayout } from './components/layout/TripLayout'
 import { SettingsPage } from './pages/SettingsPage'
+import { BoothsPage } from './pages/BoothsPage'
 
 export function App() {
   return (
@@ -28,7 +29,8 @@ export function App() {
           }
         >
           <Route index element={<div className="p-4">Items (Task 8)</div>} />
-          <Route path="booths" element={<div className="p-4">Booths (Task 7)</div>} />
+          <Route path="booths" element={<BoothsPage />} />
+          <Route path="booths/:boothId" element={<div className="p-4">Booth detail (Task 13)</div>} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
