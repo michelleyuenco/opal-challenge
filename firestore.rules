@@ -1,101 +1,43 @@
 rules_version = '2';
-
 service cloud.firestore {
-  match /databases/{database}/documents {
+  match /databases/{db}/documents {
 
-    function isAdmin() {
-      return request.auth != null
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    function isAuthenticated() {
+    function signedIn() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+    function isMember(tripData) {
+      return signedIn() && (
+        tripData.ownerUid == request.auth.uid ||
+        request.auth.uid in tripData.collaboratorUids
+      );
     }
 
-    // Users
-    match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId);
-      allow update: if isAdmin()
-        || (isOwner(userId) && request.resource.data.role == resource.data.role);
-      allow delete: if false;
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
     }
 
-    // Opals — admins manage curated opals; authenticated users may submit their own
-    match /opals/{opalId} {
-      allow read: if true;
-      allow create: if isAdmin()
-        || (isAuthenticated()
-            && request.resource.data.createdBy == request.auth.uid
-            && request.resource.data.isDeleted == false);
-      allow update: if isAdmin()
-        || (isAuthenticated()
-            && resource.data.createdBy == request.auth.uid
-            && request.resource.data.createdBy == resource.data.createdBy
-            && request.resource.data.isDeleted == resource.data.isDeleted);
-      allow delete: if isAdmin()
-        || (isAuthenticated()
-            && resource.data.createdBy == request.auth.uid);
-    }
+    match /trips/{tripId} {
+      allow read: if isMember(resource.data);
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isMember(resource.data)
+        && request.resource.data.ownerUid == resource.data.ownerUid;
+      allow delete: if signedIn()
+        && resource.data.ownerUid == request.auth.uid;
 
-    // Media — admins manage media on curated opals; users may attach media to opals they created
-    match /media/{mediaId} {
-      allow read: if true;
-      allow create: if isAuthenticated()
-        && request.resource.data.uploadedBy == request.auth.uid
-        && (
-          isAdmin()
-          || get(/databases/$(database)/documents/opals/$(request.resource.data.opalId)).data.createdBy == request.auth.uid
-        );
-      allow update, delete: if isAdmin()
-        || (isAuthenticated() && resource.data.uploadedBy == request.auth.uid);
-    }
+      match /booths/{boothId} {
+        allow read, write: if isMember(get(
+          /databases/$(db)/documents/trips/$(tripId)
+        ).data);
+      }
 
-    // Challenges
-    match /challenges/{challengeId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Submissions
-    match /submissions/{submissionId} {
-      allow read: if isAuthenticated()
-        && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isAuthenticated()
-        && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin();
-      allow delete: if false;
-    }
-
-    // Posters — owner can read/write, shared posters are public-read
-    match /posters/{posterId} {
-      allow read: if resource.data.isShared == true
-        || (isAuthenticated() && resource.data.userId == request.auth.uid)
-        || isAdmin();
-      allow create: if isAuthenticated()
-        && request.resource.data.userId == request.auth.uid;
-      allow update: if isAuthenticated()
-        && resource.data.userId == request.auth.uid;
-      allow delete: if isAuthenticated()
-        && resource.data.userId == request.auth.uid;
-    }
-
-    // Poster versions — public read; create allowed for owner or for any authed user
-    // contributing to a *shared* poster; updates/deletes restricted to the parent poster owner.
-    match /posterVersions/{versionId} {
-      allow read: if true;
-      allow create: if isAuthenticated()
-        && (
-          get(/databases/$(database)/documents/posters/$(request.resource.data.posterId)).data.userId == request.auth.uid
-          || get(/databases/$(database)/documents/posters/$(request.resource.data.posterId)).data.isShared == true
-        );
-      allow update, delete: if isAuthenticated()
-        && get(/databases/$(database)/documents/posters/$(resource.data.posterId)).data.userId == request.auth.uid;
+      match /items/{itemId} {
+        allow read, write: if isMember(get(
+          /databases/$(db)/documents/trips/$(tripId)
+        ).data);
+      }
     }
   }
 }
